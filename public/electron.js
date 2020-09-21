@@ -15,6 +15,27 @@ const os = require('os');
 const ipc = electron.ipcMain;
 const shell = electron.shell;
 
+
+const net = require('net');
+const host = (process.argv[2] || '192.168.0.13');
+const port = (process.argv[2] || '50000');
+
+const socket = new net.Socket()
+
+socket.connect(port, host);
+
+socket.on('data', (data) => {
+  console.log('Mensaje recibido desde servidor');
+  console.log(data);
+  // event.sender.send('msg-received', data);
+});
+
+socket.on('error', (e) => {
+  console.log('Error de conexion socket TCP');
+  console.log(e);
+  socket.destroy();
+});
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -60,10 +81,6 @@ app.on("activate", () => {
 ipc.on('print-to-pdf', event => {
     const pdfPath = path.join(os.tmpdir(), 'some-ducking-pdf.pdf');
     const win = BrowserWindow.fromWebContents(event.sender);
-    console.log(win);
-    console.log(mainWindow);
-    console.log(pdfPath);
-    console.log('Call print-to-pdf IPC');
     var options = { 
       marginsType: 0, 
       pageSize: 'A4', 
@@ -72,12 +89,17 @@ ipc.on('print-to-pdf', event => {
       landscape: false
     };
     win.webContents.printToPDF(options).then(data => {
-      console.log('Call printToPDF');  
       fs.writeFile(pdfPath, data, err => {
-        console.log('Call writeFile');
         if (err) return console.log(err.message);
         shell.openExternal('file://' + pdfPath);
         event.sender.send('wrote-pdf', pdfPath);
       });      
     });
+  });
+
+
+  ipc.on('send-msg-socket', (event, data) => {
+    console.log('Enviando mensaje a Alvic Server');
+    console.log(data);
+    socket.write(data);
   });
