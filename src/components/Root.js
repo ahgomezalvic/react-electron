@@ -16,7 +16,6 @@ class App extends Component {
             <li><Link to={'/alvicsvr'} className="nav-link"> Alvic Server </Link></li>
           </ul>
           </nav>
-          <hr />
           <Switch>
               <Route exact path='/' component={Home} />
               <Route exact path='/printer' component={Print} />
