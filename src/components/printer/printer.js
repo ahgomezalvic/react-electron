@@ -14,7 +14,6 @@ class ComponentToPrint extends React.Component {
           test print 2.
         </div>
       </div>
-      
     );
   }
 }
